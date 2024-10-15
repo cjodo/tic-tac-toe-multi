@@ -3,36 +3,42 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand/v2"
 	"net/http"
+	"strconv"
 
-	"github.com/cjodo/pkg/websocket"
+	"github.com/cjodo/tic-tac-toe-multi/pkg/websocket"
 )
 
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the room")
-}
-
+var PORT = ":4040"
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Host)
-
-	ws, err := upgrader.Upgrade(w, r, nil)
+	ws, err := websocket.Upgrade(w, r)
 	if err != nil {
 		log.Println(err)
 	}
+
+	rand := rand.IntN(200)
 	
-	reader(ws)
+	client := &websocket.Client{
+		ID: strconv.Itoa(rand),
+		Conn: ws,
+	}
+
+	fmt.Printf("Client joined %v\n", client.ID)
+
+	client.Read()
 }
 
-
 func setupRoutes() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/ws", serveWs)
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(w, r)
+	})
 }
 
 func main() {
-	fmt.Println("Chat App")
+	fmt.Printf("Server running on port: %v\n", PORT)
 	setupRoutes()
 
 	log.Fatal(http.ListenAndServe(":4040", nil))
