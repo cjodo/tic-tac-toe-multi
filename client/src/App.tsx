@@ -1,19 +1,27 @@
-'use strict'
-
 import './App.css'
-import { connect, sendMsg } from './api';
+
+import { Board } from './components/Board/Board'
+import { useEffect, useState } from 'react'
+
+import { connect } from './api';
 
 function App() {
-  connect();
 
-  const send = () => {
-    sendMsg("Hello")
-  }
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+
+  useEffect(() => {
+    const ws = connect("ws://localhost:4040/ws", null)
+    setSocket(ws)
+
+    return () => {
+      ws.close()
+    }
+  }, [])
 
   return (
     <>
-      <div className="card">
-        <button onClick={send}>Send Message</button>
+      <div>
+        <Board socket={socket}/>
       </div>
     </>
   )

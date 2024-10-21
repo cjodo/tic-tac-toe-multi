@@ -40,3 +40,8 @@
 .read-the-docs {
   color: #888;
 }
+
+.cell {
+  content: '';
+  aspect-ratio: 1 / 1;
+}

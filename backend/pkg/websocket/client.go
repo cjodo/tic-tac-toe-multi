@@ -1,38 +1,23 @@
 package websocket
 
 import (
-	"fmt"
-	"log"
-
-	"github.com/cjodo/tic-tac-toe-multi/pkg/lobby"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
 	ID			string
-	Player	string 
 	Conn		*websocket.Conn
+	Player	string
+	Send		chan interface{}
 }
 
-type Message struct {
-	Type int		`json:"type"`
-	Body string `json:"body"`
-}
-
-func (c *Client) Read() {
-	defer func() {
-		c.Conn.Close()
-	}()
-
-	for {
-		messageType, p, err := c.Conn.ReadMessage()
-
-		if err != nil {
-			log.Println("Client err:", err)
-			return
-		}
-		message := Message{Type: messageType, Body: string(p)}
-
-		fmt.Printf("Move Received: %v from: %v\n", message, c.ID)
+func NewClient(Conn *websocket.Conn, ID, Player string) *Client {
+	return &Client{
+		ID:			ID,
+		Conn:		Conn,
+		Player: Player,
+		// Allows multiple data types to be sent ** see pkg/message
+		Send:		make(chan interface{}),
 	}
 }
+
